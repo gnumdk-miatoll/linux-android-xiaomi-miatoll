@@ -231,7 +231,7 @@ EXPORT_SYMBOL_GPL(static_key_slow_dec);
 
 void static_key_slow_dec_cpuslocked(struct static_key *key)
 {
-	STATIC_KEY_CHECK_USE();
+	STATIC_KEY_CHECK_USE(key);
 	__static_key_slow_dec_cpuslocked(key, 0, NULL);
 }
 
