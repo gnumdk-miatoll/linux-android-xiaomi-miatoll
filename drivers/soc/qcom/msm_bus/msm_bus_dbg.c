@@ -337,6 +337,7 @@ struct dentry *msm_bus_dbg_create(const char *name, mode_t mode,
 		&client_data_fops);
 }
 
+#if 0
 int msm_bus_dbg_add_client(const struct msm_bus_client_handle *pdata)
 
 {
@@ -431,6 +432,7 @@ void msm_bus_dbg_remove_client(const struct msm_bus_client_handle *pdata)
 	}
 	rt_mutex_unlock(&msm_bus_dbg_cllist_lock);
 }
+#endif
 
 static int msm_bus_dbg_record_client(const struct msm_bus_scale_pdata *pdata,
 	int index, uint32_t clid, struct dentry *file)
@@ -808,6 +810,7 @@ static const struct file_operations msm_bus_dbg_dump_clients_fops = {
 	.read		= msm_bus_dbg_dump_clients_read,
 };
 
+#if 0
 /**
  * msm_bus_dbg_client_data() - Add debug data for clients
  * @pdata: Platform data of the client
@@ -856,6 +859,7 @@ void msm_bus_dbg_commit_data(const char *fabname, void *cdata,
 			nslaves, ntslaves);
 }
 EXPORT_SYMBOL(msm_bus_dbg_commit_data);
+#endif
 
 static int __init msm_bus_debugfs_init(void)
 {
