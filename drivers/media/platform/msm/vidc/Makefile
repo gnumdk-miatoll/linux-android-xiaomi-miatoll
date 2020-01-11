@@ -22,3 +22,5 @@ obj-$(CONFIG_DEBUG_FS) += msm_vidc_debug.o
 obj-$(CONFIG_MSM_VIDC_V4L2) += msm-vidc.o
 
 obj-$(CONFIG_MSM_VIDC_V4L2) += governors/
+
+ccflags-y	:= -DCONFIG_DEBUG_FS
