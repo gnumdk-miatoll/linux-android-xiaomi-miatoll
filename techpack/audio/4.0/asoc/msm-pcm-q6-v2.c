@@ -1474,6 +1474,10 @@ static int msm_pcm_volume_ctl_get(struct snd_kcontrol *kcontrol,
 	struct msm_audio *prtd;
 
 	pr_debug("%s\n", __func__);
+	if (!vol) {
+		pr_err("%s: vol is NULL\n", __func__);
+		return -ENODEV;
+	}
 	if (!substream) {
 		pr_err("%s substream not found\n", __func__);
 		return -ENODEV;
@@ -1517,6 +1521,7 @@ static int msm_pcm_volume_ctl_put(struct snd_kcontrol *kcontrol,
 		pr_err("%s: substream not found\n", __func__);
 		return -ENODEV;
 	}
+
 	soc_prtd = substream->private_data;
 	if (!substream->runtime || !soc_prtd) {
 		pr_err("%s: substream runtime or private_data not found\n",
@@ -1737,7 +1742,6 @@ static int msm_pcm_chmap_ctl_put(struct snd_kcontrol *kcontrol,
 				(char)(ucontrol->value.integer.value[i]);
 
 		/* update chmixer_pspd chmap cached with routing driver as well */
-		rtd = substream->private_data;
 		if (rtd) {
 				fe_id = rtd->dai_link->id;
 				chmixer_pspd = pdata ?
