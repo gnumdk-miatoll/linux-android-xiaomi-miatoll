@@ -8048,6 +8048,13 @@ static inline int find_best_target(struct task_struct *p, int *backup_cpu,
 					continue;
 
 				/*
+				 * Skip searching for active CPU for tasks have
+				 * high priority & stune.boost.
+				 */
+				if (boosted && p->prio <= DEFAULT_PRIO)
+					continue;
+
+				/*
 				 * Case A.2: Target ACTIVE CPU
 				 * Favor CPUs with max spare capacity.
 				 */
