@@ -23,6 +23,7 @@
 #include <linux/delayacct.h>
 #include <linux/module.h>
 
+DEFINE_STATIC_KEY_TRUE(delayacct_key);
 int delayacct_on __read_mostly = 1;	/* Delay accounting turned on/off */
 EXPORT_SYMBOL_GPL(delayacct_on);
 struct kmem_cache *delayacct_cache;
@@ -38,6 +39,8 @@ void delayacct_init(void)
 {
 	delayacct_cache = KMEM_CACHE(task_delay_info, SLAB_PANIC|SLAB_ACCOUNT);
 	delayacct_tsk_init(&init_task);
+	if (!delayacct_on)
+		static_branch_disable(&delayacct_key);
 }
 
 void __delayacct_tsk_init(struct task_struct *tsk)
