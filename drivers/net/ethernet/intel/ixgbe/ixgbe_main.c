@@ -50,7 +50,6 @@
 #include <linux/if_bridge.h>
 #include <linux/prefetch.h>
 #include <linux/bpf.h>
-#include <linux/bpf_trace.h>
 #include <linux/atomic.h>
 #include <scsi/fc/fc_fcoe.h>
 #include <net/udp_tunnel.h>
@@ -2254,8 +2253,6 @@ static struct sk_buff *ixgbe_run_xdp(struct ixgbe_adapter *adapter,
 		bpf_warn_invalid_xdp_action(act);
 		/* fallthrough */
 	case XDP_ABORTED:
-		trace_xdp_exception(rx_ring->netdev, xdp_prog, act);
-		/* fallthrough -- handle aborts by dropping packet */
 	case XDP_DROP:
 		result = IXGBE_XDP_CONSUMED;
 		break;

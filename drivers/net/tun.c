@@ -74,7 +74,6 @@
 #include <linux/uio.h>
 #include <linux/skb_array.h>
 #include <linux/bpf.h>
-#include <linux/bpf_trace.h>
 #include <linux/ieee802154.h>
 #include <linux/if_ltalk.h>
 #include <uapi/linux/if_fddi.h>
@@ -1360,8 +1359,6 @@ static struct sk_buff *tun_build_skb(struct tun_struct *tun,
 			bpf_warn_invalid_xdp_action(act);
 			/* fall through */
 		case XDP_ABORTED:
-			trace_xdp_exception(tun->dev, xdp_prog, act);
-			/* fall through */
 		case XDP_DROP:
 			goto err_xdp;
 		}

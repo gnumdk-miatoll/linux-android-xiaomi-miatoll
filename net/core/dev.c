@@ -97,7 +97,6 @@
 #include <linux/notifier.h>
 #include <linux/skbuff.h>
 #include <linux/bpf.h>
-#include <linux/bpf_trace.h>
 #include <net/net_namespace.h>
 #include <net/sock.h>
 #include <net/busy_poll.h>
@@ -3968,8 +3967,6 @@ static u32 netif_receive_generic_xdp(struct sk_buff *skb,
 		bpf_warn_invalid_xdp_action(act);
 		/* fall through */
 	case XDP_ABORTED:
-		trace_xdp_exception(skb->dev, xdp_prog, act);
-		/* fall through */
 	case XDP_DROP:
 	do_drop:
 		kfree_skb(skb);
@@ -3999,7 +3996,6 @@ void generic_xdp_tx(struct sk_buff *skb, struct bpf_prog *xdp_prog)
 	}
 	HARD_TX_UNLOCK(dev, txq);
 	if (free_skb) {
-		trace_xdp_exception(dev, xdp_prog, XDP_TX);
 		kfree_skb(skb);
 	}
 }

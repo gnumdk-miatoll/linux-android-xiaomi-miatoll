@@ -43,7 +43,6 @@
 
 #include <linux/bitfield.h>
 #include <linux/bpf.h>
-#include <linux/bpf_trace.h>
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
@@ -1550,7 +1549,7 @@ nfp_net_rx_drop(const struct nfp_net_dp *dp, struct nfp_net_r_vector *r_vec,
 		dev_kfree_skb_any(skb);
 }
 
-static bool
+static void 
 nfp_net_tx_xdp_buf(struct nfp_net_dp *dp, struct nfp_net_rx_ring *rx_ring,
 		   struct nfp_net_tx_ring *tx_ring,
 		   struct nfp_net_rx_buf *rxbuf, unsigned int dma_off,
@@ -1569,7 +1568,7 @@ nfp_net_tx_xdp_buf(struct nfp_net_dp *dp, struct nfp_net_rx_ring *rx_ring,
 		if (unlikely(nfp_net_tx_full(tx_ring, 1))) {
 			nfp_net_rx_drop(dp, rx_ring->r_vec, rx_ring, rxbuf,
 					NULL);
-			return false;
+			return;
 		}
 	}
 
@@ -1602,7 +1601,6 @@ nfp_net_tx_xdp_buf(struct nfp_net_dp *dp, struct nfp_net_rx_ring *rx_ring,
 
 	tx_ring->wr_p++;
 	tx_ring->wr_ptr_add++;
-	return true;
 }
 
 static int nfp_net_run_xdp(struct bpf_prog *prog, void *data, void *hard_start,
@@ -1751,20 +1749,16 @@ static int nfp_net_rx(struct nfp_net_rx_ring *rx_ring, int budget)
 				break;
 			case XDP_TX:
 				dma_off = pkt_off - NFP_NET_RX_BUF_HEADROOM;
-				if (unlikely(!nfp_net_tx_xdp_buf(dp, rx_ring,
+				nfp_net_tx_xdp_buf(dp, rx_ring,
 								 tx_ring, rxbuf,
 								 dma_off,
 								 pkt_len,
-								 &xdp_tx_cmpl)))
-					trace_xdp_exception(dp->netdev,
-							    xdp_prog, act);
+								 &xdp_tx_cmpl);
 				continue;
 			default:
 				bpf_warn_invalid_xdp_action(act);
 				/* fall through */
 			case XDP_ABORTED:
-				trace_xdp_exception(dp->netdev, xdp_prog, act);
-				/* fall through */
 			case XDP_DROP:
 				nfp_net_rx_give_one(dp, rx_ring, rxbuf->frag,
 						    rxbuf->dma_addr);

@@ -55,7 +55,6 @@
 #include <net/sock_reuseport.h>
 #include <net/busy_poll.h>
 #include <net/tcp.h>
-#include <linux/bpf_trace.h>
 
 /**
  *	sk_filter_trim_cap - run a packet through a socket filter
@@ -2567,10 +2566,8 @@ static int xdp_do_redirect_map(struct net_device *dev, struct xdp_buff *xdp,
 		goto err;
 
 	ri->map_to_flush = map;
-	_trace_xdp_redirect_map(dev, xdp_prog, fwd, map, index);
 	return 0;
 err:
-	_trace_xdp_redirect_map_err(dev, xdp_prog, fwd, map, index, err);
 	return err;
 }
 
@@ -2596,10 +2593,8 @@ int xdp_do_redirect(struct net_device *dev, struct xdp_buff *xdp,
 	if (unlikely(err))
 		goto err;
 
-	_trace_xdp_redirect(dev, xdp_prog, index);
 	return 0;
 err:
-	_trace_xdp_redirect_err(dev, xdp_prog, index, err);
 	return err;
 }
 EXPORT_SYMBOL_GPL(xdp_do_redirect);
@@ -2646,12 +2641,8 @@ int xdp_do_generic_redirect(struct net_device *dev, struct sk_buff *skb,
 	}
 
 	skb->dev = fwd;
-	map ? _trace_xdp_redirect_map(dev, xdp_prog, fwd, map, index)
-		: _trace_xdp_redirect(dev, xdp_prog, index);
 	return 0;
 err:
-	map ? _trace_xdp_redirect_map_err(dev, xdp_prog, fwd, map, index, err)
-		: _trace_xdp_redirect_err(dev, xdp_prog, index, err);
 	return err;
 }
 EXPORT_SYMBOL_GPL(xdp_do_generic_redirect);

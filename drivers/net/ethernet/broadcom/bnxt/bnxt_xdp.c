@@ -13,7 +13,6 @@
 #include <linux/etherdevice.h>
 #include <linux/if_vlan.h>
 #include <linux/bpf.h>
-#include <linux/bpf_trace.h>
 #include <linux/filter.h>
 #include "bnxt_hsi.h"
 #include "bnxt.h"
@@ -122,7 +121,6 @@ bool bnxt_rx_xdp(struct bnxt *bp, struct bnxt_rx_ring_info *rxr, u16 cons,
 
 	case XDP_TX:
 		if (tx_avail < 1) {
-			trace_xdp_exception(bp->dev, xdp_prog, act);
 			bnxt_reuse_rx_data(rxr, cons, page);
 			return true;
 		}
@@ -138,8 +136,6 @@ bool bnxt_rx_xdp(struct bnxt *bp, struct bnxt_rx_ring_info *rxr, u16 cons,
 		bpf_warn_invalid_xdp_action(act);
 		/* Fall thru */
 	case XDP_ABORTED:
-		trace_xdp_exception(bp->dev, xdp_prog, act);
-		/* Fall thru */
 	case XDP_DROP:
 		bnxt_reuse_rx_data(rxr, cons, page);
 		break;

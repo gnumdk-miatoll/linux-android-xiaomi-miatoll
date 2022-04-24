@@ -18,7 +18,6 @@
 #include <linux/irq.h>
 #include <linux/iommu.h>
 #include <linux/bpf.h>
-#include <linux/bpf_trace.h>
 #include <linux/filter.h>
 
 #include "nic_reg.h"
@@ -585,8 +584,6 @@ static inline bool nicvf_xdp_rx(struct nicvf *nic, struct bpf_prog *prog,
 		bpf_warn_invalid_xdp_action(action);
 		/* fall through */
 	case XDP_ABORTED:
-		trace_xdp_exception(nic->netdev, prog, action);
-		/* fall through */
 	case XDP_DROP:
 		/* Check if it's a recycled page, if not
 		 * unmap the DMA mapping.
