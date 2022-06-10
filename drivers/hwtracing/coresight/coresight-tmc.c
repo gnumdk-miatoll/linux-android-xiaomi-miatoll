@@ -431,7 +431,7 @@ static ssize_t out_mode_store(struct device *dev,
 
 	if (strlen(buf) >= 10)
 		return -EINVAL;
-	if (sscanf(buf, "%10s", str) != 1)
+	if (sscanf(buf, "%s", str) != 1)
 		return -EINVAL;
 	ret = tmc_etr_switch_mode(drvdata, str);
 	return ret ? ret : size;
@@ -456,7 +456,7 @@ static ssize_t pcie_path_store(struct device *dev,
 
 	if (strlen(buf) >= 10)
 		return -EINVAL;
-	if (sscanf(buf, "%10s", str) != 1)
+	if (sscanf(buf, "%s", str) != 1)
 		return -EINVAL;
 
 	mutex_lock(&drvdata->mem_lock);
