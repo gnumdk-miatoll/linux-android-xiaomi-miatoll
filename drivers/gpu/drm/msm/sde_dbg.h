@@ -115,25 +115,19 @@ extern struct sde_dbg_evtlog *sde_dbg_base_evtlog;
  * SDE_EVT32 - Write a list of 32bit values to the event log, default area
  * ... - variable arguments
  */
-#define SDE_EVT32(...) sde_evtlog_log(sde_dbg_base_evtlog, __func__, \
-		__LINE__, SDE_EVTLOG_ALWAYS, ##__VA_ARGS__, \
-		SDE_EVTLOG_DATA_LIMITER)
+#define SDE_EVT32(...)
 
 /**
  * SDE_EVT32_VERBOSE - Write a list of 32bit values for verbose event logging
  * ... - variable arguments
  */
-#define SDE_EVT32_VERBOSE(...) sde_evtlog_log(sde_dbg_base_evtlog, __func__, \
-		__LINE__, SDE_EVTLOG_VERBOSE, ##__VA_ARGS__, \
-		SDE_EVTLOG_DATA_LIMITER)
+#define SDE_EVT32_VERBOSE(...)
 
 /**
  * SDE_EVT32_IRQ - Write a list of 32bit values to the event log, IRQ area
  * ... - variable arguments
  */
-#define SDE_EVT32_IRQ(...) sde_evtlog_log(sde_dbg_base_evtlog, __func__, \
-		__LINE__, SDE_EVTLOG_IRQ, ##__VA_ARGS__, \
-		SDE_EVTLOG_DATA_LIMITER)
+#define SDE_EVT32_IRQ(...)
 
 /**
  * SDE_DBG_DUMP - trigger dumping of all sde_dbg facilities
@@ -143,8 +137,7 @@ extern struct sde_dbg_evtlog *sde_dbg_base_evtlog;
  *		Including the special name "panic" will trigger a panic after
  *		the dumping work has completed.
  */
-#define SDE_DBG_DUMP(...) sde_dbg_dump(SDE_DBG_DUMP_PROC_CTX, __func__, \
-		##__VA_ARGS__, SDE_DBG_DUMP_DATA_LIMITER)
+#define SDE_DBG_DUMP(...)
 
 /**
  * SDE_DBG_DUMP_WQ - trigger dumping of all sde_dbg facilities, queuing the work
@@ -154,8 +147,7 @@ extern struct sde_dbg_evtlog *sde_dbg_base_evtlog;
  *		Including the special name "panic" will trigger a panic after
  *		the dumping work has completed.
  */
-#define SDE_DBG_DUMP_WQ(...) sde_dbg_dump(SDE_DBG_DUMP_IRQ_CTX, __func__, \
-		##__VA_ARGS__, SDE_DBG_DUMP_DATA_LIMITER)
+#define SDE_DBG_DUMP_WQ(...)
 
 /**
  * SDE_DBG_DUMP_CLK_EN - trigger dumping of all sde_dbg facilities, without clk
@@ -165,15 +157,13 @@ extern struct sde_dbg_evtlog *sde_dbg_base_evtlog;
  *		Including the special name "panic" will trigger a panic after
  *		the dumping work has completed.
  */
-#define SDE_DBG_DUMP_CLK_EN(...) sde_dbg_dump(SDE_DBG_DUMP_CLK_ENABLED_CTX, \
-		__func__, ##__VA_ARGS__, SDE_DBG_DUMP_DATA_LIMITER)
+#define SDE_DBG_DUMP_CLK_EN(...)
 
 /**
  * SDE_DBG_EVT_CTRL - trigger a different driver events
  *  event: event that trigger different behavior in the driver
  */
-#define SDE_DBG_CTRL(...) sde_dbg_ctrl(__func__, ##__VA_ARGS__, \
-		SDE_DBG_DUMP_DATA_LIMITER)
+#define SDE_DBG_CTRL(...)
 
 #if 0
 
