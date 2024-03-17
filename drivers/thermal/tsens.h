@@ -93,11 +93,11 @@ struct tsens_device;
 		}	\
 	} while (0)
 #else
-#define	TSENS_DBG1(x...)		pr_debug(x)
-#define	TSENS_DBG(x...)		pr_debug(x)
-#define	TSENS_INFO(x...)		pr_info(x)
-#define	TSENS_ERR(x...)		pr_err(x)
-#define	TSENS_DUMP(x...)		pr_info(x)
+#define	TSENS_DBG1(dev, msg, args...)		pr_debug(msg, ##args)
+#define	TSENS_DBG(dev, msg, args...)		pr_debug(msg, ##args)
+#define	TSENS_INFO(dev, msg, args...)		pr_info(msg, ##args)
+#define	TSENS_ERR(dev, msg, args...)		pr_err(msg, ##args)
+#define	TSENS_DUMP(dev, msg, args...)		pr_info(msg, ##args)
 #endif
 
 #if defined(CONFIG_THERMAL_TSENS)
