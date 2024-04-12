@@ -118,7 +118,7 @@ static int test_power_get_battery_property(struct power_supply *psy,
 		val->intval = battery_voltage;
 		break;
 	default:
-		pr_info("%s: some properties deliberately report errors.\n",
+		pr_debug("%s: some properties deliberately report errors.\n",
 			__func__);
 		return -EINVAL;
 	}
@@ -232,7 +232,7 @@ static void __exit test_power_exit(void)
 	battery_status = POWER_SUPPLY_STATUS_DISCHARGING;
 	for (i = 0; i < ARRAY_SIZE(test_power_supplies); i++)
 		power_supply_changed(test_power_supplies[i]);
-	pr_info("%s: 'changed' event sent, sleeping for 10 seconds...\n",
+	pr_debug("%s: 'changed' event sent, sleeping for 10 seconds...\n",
 		__func__);
 	ssleep(10);
 

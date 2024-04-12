@@ -3958,7 +3958,7 @@ static ssize_t lct_thermal_call_status_store(struct device *dev,
 	}
 
     LctIsInCall = input;
-	pr_info("IsInCall = %d\n", LctIsInCall);
+	pr_debug("IsInCall = %d\n", LctIsInCall);
 
 	return count;
 }
@@ -4073,7 +4073,7 @@ static int smb5_show_charger_status(struct smb5 *chip)
 	}
 	batt_charge_type = val.intval;
 
-	pr_info("SMB5 status - usb:present=%d type=%d batt:present = %d health = %d charge = %d\n",
+	pr_debug("SMB5 status - usb:present=%d type=%d batt:present = %d health = %d charge = %d\n",
 		usb_present, chg->real_charger_type,
 		batt_present, batt_health, batt_charge_type);
 	return rc;
@@ -4237,12 +4237,12 @@ static int smb5_probe(struct platform_device *pdev)
 		pr_err("Couldn't initialize batt psy rc=%d\n", rc);
 		goto cleanup;
 	}
-	pr_info("enter sysfs create file thermal\n");
+	pr_debug("enter sysfs create file thermal\n");
 	for (attr_count2 = 0; attr_count2 < ARRAY_SIZE(attrs2); attr_count2++) {
 	    rc = sysfs_create_file(&chg->dev->kobj,
 					&attrs2[attr_count2].attr);
 		if (rc < 0) {
-			pr_info(" sysfs create file fail %d\n",rc);
+			pr_debug(" sysfs create file fail %d\n",rc);
 	        sysfs_remove_file(&chg->dev->kobj,
 					&attrs2[attr_count2].attr);
 		}
@@ -4293,7 +4293,7 @@ static int smb5_probe(struct platform_device *pdev)
 		schedule_delayed_work(&chg->reg_work, 30 * HZ);
 	}
 
-	pr_info("QPNP SMB5 probed successfully\n");
+	pr_debug("QPNP SMB5 probed successfully\n");
 
 	return rc;
 

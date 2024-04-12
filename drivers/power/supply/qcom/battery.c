@@ -129,9 +129,6 @@ module_param_named(debug_mask, debug_mask, int, 0600);
 
 #define pl_dbg(chip, reason, fmt, ...)				\
 	do {								\
-		if (debug_mask & (reason))				\
-			pr_info(fmt, ##__VA_ARGS__);	\
-		else							\
 			pr_debug(fmt, ##__VA_ARGS__);		\
 	} while (0)
 
@@ -1240,7 +1237,7 @@ static int pl_fv_vote_callback(struct votable *votable, void *data,
 			pr_err("Couldn't get battery status rc=%d\n", rc);
 		} else {
 			if (pval.intval == POWER_SUPPLY_STATUS_FULL) {
-				pr_info("re-triggering charging\n");
+				pr_debug("re-triggering charging\n");
 				pval.intval = 1;
 				rc = power_supply_set_property(chip->batt_psy,
 					POWER_SUPPLY_PROP_FORCE_RECHARGE,
@@ -1404,7 +1401,7 @@ static int pl_disable_vote_callback(struct votable *votable,
 			return rc;
 
 		if (disable) {
-			pr_info("Parallel ICL is less than min ICL(%d), skipping parallel enable\n",
+			pr_debug("Parallel ICL is less than min ICL(%d), skipping parallel enable\n",
 					chip->pl_min_icl_ua);
 			return 0;
 		}

@@ -2372,10 +2372,10 @@ static bool is_profile_load_required(struct fg_dev *fg)
 		if (!chip->dt.force_load_profile) {
 			pr_warn("Profiles doesn't match, skipping loading it since force_load_profile is disabled\n");
 			if (fg_profile_dump) {
-				pr_info("FG: loaded profile:\n");
+				pr_debug("FG: loaded profile:\n");
 				dump_sram(fg, buf, PROFILE_LOAD_WORD,
 					PROFILE_COMP_LEN);
-				pr_info("FG: available profile:\n");
+				pr_debug("FG: available profile:\n");
 				dump_sram(fg, chip->batt_profile,
 					PROFILE_LOAD_WORD, PROFILE_LEN);
 			}
@@ -2387,7 +2387,7 @@ static bool is_profile_load_required(struct fg_dev *fg)
 	} else {
 		fg_dbg(fg, FG_STATUS, "Profile integrity bit is not set\n");
 		if (fg_profile_dump) {
-			pr_info("FG: profile to be loaded:\n");
+			pr_debug("FG: profile to be loaded:\n");
 			dump_sram(fg, chip->batt_profile, PROFILE_LOAD_WORD,
 				PROFILE_LEN);
 		}
@@ -2674,7 +2674,7 @@ static int fg_restart_sysfs(const char *val, const struct kernel_param *kp)
 		return rc;
 	}
 
-	pr_info("FG restart done\n");
+	pr_debug("FG restart done\n");
 	return rc;
 }
 
@@ -4865,7 +4865,7 @@ static int fg_gen3_probe(struct platform_device *pdev)
 		rc = fg_get_battery_temp(fg, &batt_temp);
 
 	if (!rc) {
-		pr_info("battery SOC:%d voltage: %duV temp: %d\n",
+		pr_debug("battery SOC:%d voltage: %duV temp: %d\n",
 				msoc, volt_uv, batt_temp);
 		rc = fg_esr_filter_config(fg, batt_temp);
 		if (rc < 0)
