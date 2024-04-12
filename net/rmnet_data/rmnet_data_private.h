@@ -66,10 +66,8 @@ extern unsigned int rmnet_data_log_module_mask;
 /* Don't use pr_debug as it is compiled out of the kernel. We can be sure of
  * minimal impact as LOGD is not enabled by default.
  */
-#define LOGD(fmt, ...) do { if (unlikely( \
-			    (rmnet_data_log_level & RMNET_LOG_LVL_DBG) && \
-			    (rmnet_data_log_module_mask & rmnet_mod_mask))) \
-			pr_notice("[RMNET:DBG] %s(): " fmt "\n", __func__, \
+#define LOGD(fmt, ...) do { \
+			pr_debug("[RMNET:DBG] %s(): " fmt "\n", __func__, \
 				  ##__VA_ARGS__); \
 			} while (0)
 
