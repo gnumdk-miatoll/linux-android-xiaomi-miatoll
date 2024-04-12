@@ -27,12 +27,6 @@
 #include <linux/sched.h>
 #include <linux/wait.h>
 #include "usbpd.h"
-#ifdef CONFIG_DEBUG_USB
-#undef dev_dbg
-#undef pr_debug
-#define dev_dbg dev_err
-#define pr_debug pr_err
-#endif
 #define USB_PDPHY_MAX_DATA_OBJ_LEN	28
 #define USB_PDPHY_MSG_HDR_LEN		2
 
