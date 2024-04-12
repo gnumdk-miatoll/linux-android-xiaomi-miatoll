@@ -4399,21 +4399,11 @@ void netdev_info(const struct net_device *dev, const char *format, ...);
 #define MODULE_ALIAS_NETDEV(device) \
 	MODULE_ALIAS("netdev-" device)
 
-#if defined(CONFIG_DYNAMIC_DEBUG)
-#define netdev_dbg(__dev, format, args...)			\
-do {								\
-	dynamic_netdev_dbg(__dev, format, ##args);		\
-} while (0)
-#elif defined(DEBUG)
-#define netdev_dbg(__dev, format, args...)			\
-	netdev_printk(KERN_DEBUG, __dev, format, ##args)
-#else
 #define netdev_dbg(__dev, format, args...)			\
 ({								\
 	if (0)							\
 		netdev_printk(KERN_DEBUG, __dev, format, ##args); \
 })
-#endif
 
 #if defined(VERBOSE_DEBUG)
 #define netdev_vdbg	netdev_dbg
@@ -4465,23 +4455,12 @@ do {								\
 #define netif_info(priv, type, dev, fmt, args...)		\
 	netif_level(info, priv, type, dev, fmt, ##args)
 
-#if defined(CONFIG_DYNAMIC_DEBUG)
-#define netif_dbg(priv, type, netdev, format, args...)		\
-do {								\
-	if (netif_msg_##type(priv))				\
-		dynamic_netdev_dbg(netdev, format, ##args);	\
-} while (0)
-#elif defined(DEBUG)
-#define netif_dbg(priv, type, dev, format, args...)		\
-	netif_printk(priv, type, KERN_DEBUG, dev, format, ##args)
-#else
 #define netif_dbg(priv, type, dev, format, args...)			\
 ({									\
 	if (0)								\
 		netif_printk(priv, type, KERN_DEBUG, dev, format, ##args); \
 	0;								\
 })
-#endif
 
 /* if @cond then downgrade to debug, else print at @level */
 #define netif_cond_dbg(priv, type, netdev, cond, level, fmt, args...)     \
