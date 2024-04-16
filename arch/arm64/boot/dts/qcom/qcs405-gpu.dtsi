@@ -53,7 +53,7 @@
 
 		qcom,initial-pwrlevel = <3>;
 
-		qcom,idle-timeout = <80>; //msecs
+		qcom,idle-timeout = <58>; //msecs
 		qcom,strtstp-sleepwake;
 		qcom,gpu-bimc-interface-clk-freq = <400000000>; //In Hz
 		qcom,gpu-disable-fuse = <0x41a0 0x00000001 29>;
