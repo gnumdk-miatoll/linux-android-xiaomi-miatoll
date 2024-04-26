@@ -225,7 +225,8 @@ static int aw8624_i2c_write(struct aw8624 *aw8624,
 			break;
 		}
 		cnt++;
-		msleep(AW_I2C_RETRY_DELAY);
+		usleep_range(AW_I2C_RETRY_DELAY * 1000,
+                        AW_I2C_RETRY_DELAY * 1000 + 500);
 	}
 
 	return ret;
@@ -247,7 +248,8 @@ static int aw8624_i2c_read(struct aw8624 *aw8624,
 			break;
 		}
 		cnt++;
-		msleep(AW_I2C_RETRY_DELAY);
+		usleep_range(AW_I2C_RETRY_DELAY * 1000,
+                        AW_I2C_RETRY_DELAY * 1000 + 500);
 	}
 
 	return ret;
@@ -514,7 +516,7 @@ static int aw8624_haptic_softreset(struct aw8624 *aw8624)
 	pr_debug("%s enter\n", __func__);
 
 	aw8624_i2c_write(aw8624, AW8624_REG_ID, 0xAA);
-	msleep(1);
+	usleep_range(3000, 3500);
 	return 0;
 }
 
@@ -619,7 +621,7 @@ static int aw8624_haptic_stop_delay(struct aw8624 *aw8624)
 		if ((reg_val & 0x0f) == 0x00) {
 			return 0;
 
-			msleep(2);
+			usleep_range(2000, 2500);
 		}
 		pr_debug("%s wait for standby, reg glb_state=0x%02x\n",
 			 __func__, reg_val);
@@ -2927,19 +2929,19 @@ static int aw8624_hw_reset(struct aw8624 *aw8624)
 {
 #ifdef ENABLE_PIN_CONTROL
 	int rc = select_pin_ctl(aw8624, "aw8624_reset_active");
-	msleep(5);
+	usleep_range(5000, 5500);
 	rc = select_pin_ctl(aw8624, "aw8624_reset_reset");
-	msleep(5);
+	usleep_range(5000, 5500);
 	rc = select_pin_ctl(aw8624, "aw8624_reset_active");
 #endif
 	if (!aw8624->enable_pin_control) {
 		if (aw8624 && gpio_is_valid(aw8624->reset_gpio)) {
 			gpio_set_value_cansleep(aw8624->reset_gpio, 0);
 			VIB_DEBUG("pull down1");
-			msleep(5);
+			usleep_range(5000, 5500);
 			gpio_set_value_cansleep(aw8624->reset_gpio, 1);
 			VIB_DEBUG("pull up1");
-			msleep(5);
+			usleep_range(5000, 5500);
 		} else {
 			dev_err(aw8624->dev, "%s:  failed\n", __func__);
 		}
@@ -2981,7 +2983,8 @@ static int aw8624_read_chipid(struct aw8624 *aw8624)
 		}
 		cnt++;
 
-		msleep(AW_READ_CHIPID_RETRY_DELAY);
+	        usleep_range(AW_READ_CHIPID_RETRY_DELAY * 1000,
+                       AW_READ_CHIPID_RETRY_DELAY * 1000 + 500);
 	}
 
 	return -EINVAL;
