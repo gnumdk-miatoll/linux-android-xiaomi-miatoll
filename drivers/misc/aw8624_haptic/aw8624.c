@@ -45,7 +45,7 @@
 
 #define AW8624_VERSION "v1.0.9"
 
-#define AWINIC_RAM_UPDATE_DELAY
+#define AWINIC_RAM_UPDATE_DELAY 10000
 
 #define AW_I2C_RETRIES 2
 #define AW_I2C_RETRY_DELAY 2
@@ -494,7 +494,7 @@ static void aw8624_ram_work_routine(struct work_struct *work)
 static int aw8624_ram_init(struct aw8624 *aw8624)
 {
 #ifdef AWINIC_RAM_UPDATE_DELAY
-	int ram_timer_val = 5000;
+	int ram_timer_val = AWINIC_RAM_UPDATE_DELAY;
 	INIT_DELAYED_WORK(&aw8624->ram_work, aw8624_ram_work_routine);
 	//schedule_delayed_work(&aw8624->ram_work,
 	//msecs_to_jiffies(ram_timer_val));
