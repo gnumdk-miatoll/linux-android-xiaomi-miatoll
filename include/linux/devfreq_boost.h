@@ -14,11 +14,11 @@ enum df_device {
 };
 
 #ifdef CONFIG_DEVFREQ_BOOST
-void devfreq_boost_kick(enum df_device device);
+void devfreq_boost_kick(enum df_device device, bool max);
 void devfreq_register_boost_device(enum df_device device, struct devfreq *df);
 #else
 static inline
-void devfreq_boost_kick(enum df_device device)
+void devfreq_boost_kick(enum df_device device, bool max)
 {
 }
 static inline

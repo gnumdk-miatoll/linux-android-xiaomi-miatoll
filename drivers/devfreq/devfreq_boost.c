@@ -14,12 +14,13 @@
 
 enum {
 	SCREEN_OFF,
-	INPUT_BOOST
+	INPUT_BOOST,
+	MAX_BOOST
 };
 
 struct boost_dev {
 	struct devfreq *df;
-	struct delayed_work input_unboost;
+	struct delayed_work unboost;
 	wait_queue_head_t boost_waitq;
 	unsigned long boost_freq;
 	unsigned long state;
@@ -30,12 +31,12 @@ struct df_boost_drv {
 	struct notifier_block msm_drm_notif;
 };
 
-static void devfreq_input_unboost(struct work_struct *work);
+static void devfreq_unboost(struct work_struct *work);
 
 #define BOOST_DEV_INIT(b, dev, freq) .devices[dev] = {				\
-	.input_unboost =							\
-		__DELAYED_WORK_INITIALIZER((b).devices[dev].input_unboost,	\
-					   devfreq_input_unboost, 0),		\
+	.unboost =								\
+		__DELAYED_WORK_INITIALIZER((b).devices[dev].unboost,		\
+					   devfreq_unboost, 0),			\
 	.boost_waitq =								\
 		__WAIT_QUEUE_HEAD_INITIALIZER((b).devices[dev].boost_waitq),	\
 	.boost_freq = freq							\
@@ -48,22 +49,32 @@ static struct df_boost_drv df_boost_drv_g __read_mostly = {
 		       CONFIG_DEVFREQ_MSM_LLCCBW_BOOST_FREQ)
 };
 
-static void __devfreq_boost_kick(struct boost_dev *b)
+static void __devfreq_boost_kick(struct boost_dev *b, bool max)
 {
+	int input_boost_duration;
+
 	if (!READ_ONCE(b->df) || test_bit(SCREEN_OFF, &b->state))
 		return;
 
-	set_bit(INPUT_BOOST, &b->state);
-	if (!mod_delayed_work(system_unbound_wq, &b->input_unboost,
-		msecs_to_jiffies(CONFIG_DEVFREQ_INPUT_BOOST_DURATION_MS)))
+	if (max) {
+		set_bit(MAX_BOOST, &b->state);
+		clear_bit(INPUT_BOOST, &b->state);
+		input_boost_duration = CONFIG_DEVFREQ_INPUT_BOOST_MAX_DURATION_MS;
+	} else {
+		set_bit(INPUT_BOOST, &b->state);
+		input_boost_duration = CONFIG_DEVFREQ_INPUT_BOOST_DURATION_MS;
+	}
+
+	if (!mod_delayed_work(system_unbound_wq, &b->unboost,
+		msecs_to_jiffies(input_boost_duration)))
 		wake_up(&b->boost_waitq);
 }
 
-void devfreq_boost_kick(enum df_device device)
+void devfreq_boost_kick(enum df_device device, bool max)
 {
 	struct df_boost_drv *d = &df_boost_drv_g;
 
-	__devfreq_boost_kick(d->devices + device);
+	__devfreq_boost_kick(d->devices + device, max);
 }
 
 void devfreq_register_boost_device(enum df_device device, struct devfreq *df)
@@ -76,11 +87,12 @@ void devfreq_register_boost_device(enum df_device device, struct devfreq *df)
 	WRITE_ONCE(b->df, df);
 }
 
-static void devfreq_input_unboost(struct work_struct *work)
+static void devfreq_unboost(struct work_struct *work)
 {
 	struct boost_dev *b = container_of(to_delayed_work(work),
-					   typeof(*b), input_unboost);
+					   typeof(*b), unboost);
 
+	clear_bit(MAX_BOOST, &b->state);
 	clear_bit(INPUT_BOOST, &b->state);
 	wake_up(&b->boost_waitq);
 }
@@ -92,6 +104,8 @@ static void devfreq_update_boosts(struct boost_dev *b, unsigned long state)
 	mutex_lock(&df->lock);
 	if (test_bit(SCREEN_OFF, &state)) {
 		df->min_freq = df->profile->freq_table[0];
+	} else if (test_bit(MAX_BOOST, &state)) {
+		df->min_freq = df->max_freq;
 	} else {
 		df->min_freq = test_bit(INPUT_BOOST, &state) ?
 			       min(b->boost_freq, df->max_freq) :
@@ -164,7 +178,7 @@ static void devfreq_boost_input_event(struct input_handle *handle,
 	int i;
 
 	for (i = 0; i < DEVFREQ_MAX; i++)
-		__devfreq_boost_kick(d->devices + i);
+		__devfreq_boost_kick(d->devices + i, false);
 }
 
 static int devfreq_boost_input_connect(struct input_handler *handler,
