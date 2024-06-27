@@ -286,6 +286,12 @@ config INPUT_BOOST_DURATION_MS
 	help
 	  Input boost duration in milliseconds.
 
+config INPUT_BOOST_MAX_DURATION_MS
+	int "Input boost max duration"
+	default "1000"
+	help
+	  Max input boost duration in milliseconds.
+
 config INPUT_BOOST_FREQ_LP
 	int "Low-power cluster boost freq"
 	default "0"

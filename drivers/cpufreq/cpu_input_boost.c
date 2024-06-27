@@ -20,33 +20,36 @@
 
 enum {
 	SCREEN_OFF,
-	INPUT_BOOST
+	INPUT_BOOST,
+	MAX_BOOST
 };
 
 struct boost_drv {
-	struct delayed_work input_unboost;
+	struct delayed_work unboost;
 	struct notifier_block cpu_notif;
 	struct notifier_block msm_drm_notif;
 	wait_queue_head_t boost_waitq;
 	unsigned long state;
+	bool max;
 };
 
-static void input_unboost_worker(struct work_struct *work);
+static void unboost_worker(struct work_struct *work);
 
 static struct boost_drv boost_drv_g __read_mostly = {
-	.input_unboost = __DELAYED_WORK_INITIALIZER(boost_drv_g.input_unboost,
-						    input_unboost_worker, 0),
+	.unboost = __DELAYED_WORK_INITIALIZER(boost_drv_g.unboost,
+					      unboost_worker, 0),
 	.boost_waitq = __WAIT_QUEUE_HEAD_INITIALIZER(boost_drv_g.boost_waitq)
 };
 
-static unsigned int get_input_boost_freq(struct cpufreq_policy *policy)
+static unsigned int get_input_boost_freq(struct cpufreq_policy *policy, bool max)
 {
 	unsigned int freq;
 
-	if (cpumask_test_cpu(policy->cpu, cpu_lp_mask))
-		freq = CONFIG_INPUT_BOOST_FREQ_LP;
-	else
-		freq = CONFIG_INPUT_BOOST_FREQ_PERF;
+	if (cpumask_test_cpu(policy->cpu, cpu_lp_mask)) {
+		freq = max ? policy->max : CONFIG_INPUT_BOOST_FREQ_LP;
+	} else {
+		freq = max ? policy->max : CONFIG_INPUT_BOOST_FREQ_PERF;
+	}
 
 	return min(freq, policy->max);
 }
@@ -64,29 +67,43 @@ static void update_online_cpu_policy(void)
 	put_online_cpus();
 }
 
-static void __cpu_input_boost_kick(struct boost_drv *b)
+static void __cpu_input_boost_kick(struct boost_drv *b, bool max)
 {
+	int input_boost_duration;
+
 	if (test_bit(SCREEN_OFF, &b->state))
 		return;
 
-	set_bit(INPUT_BOOST, &b->state);
-	if (!mod_delayed_work(system_unbound_wq, &b->input_unboost,
-			      msecs_to_jiffies(CONFIG_INPUT_BOOST_DURATION_MS)))
+	if (test_bit(MAX_BOOST, &b->state))
+		return;
+
+	if (max) {
+		set_bit(MAX_BOOST, &b->state);
+		clear_bit(INPUT_BOOST, &b->state);
+		input_boost_duration = CONFIG_INPUT_BOOST_MAX_DURATION_MS;
+	} else {
+		set_bit(INPUT_BOOST, &b->state);
+		input_boost_duration = CONFIG_INPUT_BOOST_DURATION_MS;
+	}
+
+	if (!mod_delayed_work(system_unbound_wq, &b->unboost,
+			      msecs_to_jiffies(input_boost_duration)))
 		wake_up(&b->boost_waitq);
 }
 
-void cpu_input_boost_kick(void)
+void cpu_input_boost_kick(bool max)
 {
 	struct boost_drv *b = &boost_drv_g;
 
-	__cpu_input_boost_kick(b);
+	__cpu_input_boost_kick(b, max);
 }
 
-static void input_unboost_worker(struct work_struct *work)
+static void unboost_worker(struct work_struct *work)
 {
 	struct boost_drv *b = container_of(to_delayed_work(work),
-					   typeof(*b), input_unboost);
+					   typeof(*b), unboost);
 
+	clear_bit(MAX_BOOST, &b->state);
 	clear_bit(INPUT_BOOST, &b->state);
 	wake_up(&b->boost_waitq);
 }
@@ -139,7 +156,9 @@ static int cpu_notifier_cb(struct notifier_block *nb, unsigned long action,
 	 * unboosting, set policy->min to the absolute min freq for the CPU.
 	 */
 	if (test_bit(INPUT_BOOST, &b->state))
-		policy->min = get_input_boost_freq(policy);
+		policy->min = get_input_boost_freq(policy, false);
+	else if (test_bit(MAX_BOOST, &b->state))
+		policy->min = get_input_boost_freq(policy, true);
 	else
 		policy->min = policy->cpuinfo.min_freq;
 
@@ -162,8 +181,9 @@ static int msm_drm_notifier_cb(struct notifier_block *nb, unsigned long action,
 		clear_bit(SCREEN_OFF, &b->state);
 	} else {
 		set_bit(SCREEN_OFF, &b->state);
-		wake_up(&b->boost_waitq);
 	}
+
+	wake_up(&b->boost_waitq);
 
 	return NOTIFY_OK;
 }
@@ -174,7 +194,7 @@ static void cpu_input_boost_input_event(struct input_handle *handle,
 {
 	struct boost_drv *b = handle->handler->private;
 
-	__cpu_input_boost_kick(b);
+	__cpu_input_boost_kick(b, false);
 }
 
 static int cpu_input_boost_input_connect(struct input_handler *handler,
