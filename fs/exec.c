@@ -62,6 +62,8 @@
 #include <linux/oom.h>
 #include <linux/compat.h>
 #include <linux/vmalloc.h>
+#include <linux/devfreq_boost.h>
+#include <linux/cpu_input_boost.h>
 
 #include <linux/uaccess.h>
 #include <asm/mmu_context.h>
@@ -1832,6 +1834,12 @@ static int do_execveat_common(int fd, struct filename *filename,
 	retval = exec_binprm(bprm);
 	if (retval < 0)
 		goto out;
+
+	if (unlikely(!strcmp(filename->name, "/usr/lib/aarch64-linux-gnu/glib-2.0/gio-launch-desktop"))) {
+               cpu_input_boost_kick(true);
+               devfreq_boost_kick(DEVFREQ_MSM_CPUBW, true);
+               devfreq_boost_kick(DEVFREQ_MSM_LLCCBW, true);
+	}
 
 	/* execve succeeded */
 	current->fs->in_exec = 0;
